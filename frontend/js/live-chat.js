@@ -1,6 +1,6 @@
 // Smartsupp Live Chat
 var _smartsupp = _smartsupp || {};
-_smartsupp.key = '409c3f069162620d184619c6045023c9bfa7e3c1';
+_smartsupp.key = '87ca2f4eb4e00b4aee98fc2aebf3c5883c64df4c';
 window.smartsupp || (function (d) {
   var s, c, o = smartsupp = function () {
     o._.push(arguments);

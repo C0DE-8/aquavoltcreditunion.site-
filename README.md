@@ -71,7 +71,7 @@ frontend/js/live-chat.js
 Current Smartsupp key:
 
 ```text
-409c3f069162620d184619c6045023c9bfa7e3c1
+87ca2f4eb4e00b4aee98fc2aebf3c5883c64df4c
 ```
 
 Every non-font frontend HTML page includes this script before `</body>`.
