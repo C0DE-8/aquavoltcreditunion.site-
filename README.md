@@ -81,7 +81,7 @@ Every non-font frontend HTML page includes this script before `</body>`.
 Current site/support email:
 
 ```text
-farmerscreditunion612@gmail.com
+support@aquavoltcreditunion.site
 ```
 
 This is used in visible frontend contact areas and as `EMAIL_USER` for backend mail configuration.
@@ -105,7 +105,7 @@ API_KEY=dbms_full_key_from_gateway
 DBMS_URL=http://localhost:4000
 DBMS_TIMEOUT_MS=15000
 
-EMAIL_USER=farmerscreditunion612@gmail.com
+EMAIL_USER=support@aquavoltcreditunion.site
 EMAIL_PASS=your_email_app_password
 OTP_EXPIRY_MINUTES=10
 ```
