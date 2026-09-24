@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="dark">
+<html lang="en">
 <head>
     <link rel="icon" type="image/png" href="../images/aquavolt-favicon.png">
     <link rel="apple-touch-icon" href="../images/aquavolt-favicon.png">
@@ -201,6 +201,20 @@
             height: 2.5rem;
             border-radius: 0.5rem;
         }
+
+        .modal-card {
+            animation: modalEnter 0.18s ease-out;
+        }
+        @keyframes modalEnter {
+            from { opacity: 0; transform: translateY(8px) scale(.99); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .table-scroll { scrollbar-width: thin; }
+        #usersTable tr { transition: background-color .15s ease; }
+        #usersTable td { vertical-align: middle; }
+        @media (max-width: 640px) {
+            .toast { left: 1rem; right: 1rem; min-width: 0; }
+        }
     </style>
 </head>
 <body class="min-h-screen">
@@ -219,7 +233,7 @@
                     </div>
                 </div>
                 <div class="flex items-center space-x-2 sm:space-x-4">
-                    <button id="themeToggle" class="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors">
+                    <button id="themeToggle" aria-label="Switch color theme" title="Switch color theme" class="p-2 text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-green-600">
                         <svg id="sunIcon" class="w-5 h-5 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path>
                         </svg>
@@ -296,14 +310,18 @@
         
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 p-6">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
-                <h2 class="text-xl font-bold">User Management</h2>
+                <div>
+                    <h2 class="text-xl font-bold">User Management</h2>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1">Search, review, and manage member accounts.</p>
+                </div>
                 <button id="createUserBtn" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium">
                     + Create User
                 </button>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                <input type="text" id="searchInput" placeholder="Search users..." class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-600">
+                <label class="sr-only" for="searchInput">Search users</label>
+                <input type="search" id="searchInput" placeholder="Search name, email, or account…" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-600">
                 <select id="statusFilter" class="px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-600">
                     <option value="">All Status</option>
                     <option value="active">Active</option>
@@ -321,7 +339,7 @@
                 </select>
             </div>
 
-            <div class="overflow-x-auto">
+            <div class="overflow-x-auto table-scroll rounded-lg border border-gray-200 dark:border-gray-700">
                 <table class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-700">
                         <tr>
@@ -511,16 +529,41 @@
     </div>
 
    
-    <div id="viewUserModal" class="modal">
-        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full mx-4">
+    <div id="viewUserModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="viewUserTitle">
+        <div class="modal-card bg-white dark:bg-gray-800 rounded-xl shadow-xl max-w-2xl w-full mx-4">
             <div class="p-6 border-b border-gray-200 dark:border-gray-700">
-                <h3 class="text-xl font-bold">User Details</h3>
+                <h3 id="viewUserTitle" class="text-xl font-bold">User Details</h3>
             </div>
             <div class="p-6" id="userDetailsContent">
                  User details will be populated here 
             </div>
             <div class="p-6 border-t border-gray-200 dark:border-gray-700 flex justify-end">
                 <button id="closeViewBtn" class="px-6 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="confirmActionModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="confirmActionTitle" aria-describedby="confirmActionDescription">
+        <div class="modal-card bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 max-w-md w-full mx-4 overflow-hidden">
+            <div class="p-6">
+                <div class="flex items-start gap-4">
+                    <div id="confirmActionIcon" class="flex-shrink-0 w-11 h-11 rounded-full bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300 flex items-center justify-center" aria-hidden="true">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v3m0 4h.01M10.29 3.86l-7.1 12.3A2 2 0 004.92 19h14.16a2 2 0 001.73-2.84l-7.1-12.3a2 2 0 00-3.46 0z"></path></svg>
+                    </div>
+                    <div class="min-w-0">
+                        <h3 id="confirmActionTitle" class="text-lg font-bold">Confirm action</h3>
+                        <p id="confirmActionDescription" class="mt-2 text-sm text-gray-600 dark:text-gray-300 whitespace-pre-line"></p>
+                    </div>
+                </div>
+                <div id="confirmTextWrap" class="hidden mt-5">
+                    <label id="confirmTextLabel" for="confirmTextInput" class="block text-sm font-medium mb-2"></label>
+                    <input id="confirmTextInput" type="text" autocomplete="off" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-red-600" aria-describedby="confirmTextHint">
+                    <p id="confirmTextHint" class="mt-2 text-xs text-gray-500 dark:text-gray-400"></p>
+                </div>
+            </div>
+            <div class="px-6 py-4 bg-gray-50 dark:bg-gray-900/50 border-t border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+                <button id="cancelConfirmAction" type="button" class="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-white dark:hover:bg-gray-700 transition-colors">Cancel</button>
+                <button id="acceptConfirmAction" type="button" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors">Continue</button>
             </div>
         </div>
     </div>
@@ -549,12 +592,59 @@
             localStorage.setItem('theme', theme);
         }
 
-        const savedTheme = localStorage.getItem('theme') || 'dark';
+        const savedTheme = localStorage.getItem('theme') || 'light';
         setTheme(savedTheme);
 
         themeToggle.addEventListener('click', () => {
             const currentTheme = html.classList.contains('dark') ? 'dark' : 'light';
             setTheme(currentTheme === 'dark' ? 'light' : 'dark');
+        });
+
+        let confirmationResolver = null;
+        function confirmAction({ title, description, confirmLabel = 'Continue', danger = true, expectedText = '', inputLabel = '', inputHint = '' }) {
+            const modal = document.getElementById('confirmActionModal');
+            const inputWrap = document.getElementById('confirmTextWrap');
+            const input = document.getElementById('confirmTextInput');
+            const accept = document.getElementById('acceptConfirmAction');
+            document.getElementById('confirmActionTitle').textContent = title;
+            document.getElementById('confirmActionDescription').textContent = description;
+            document.getElementById('confirmTextLabel').textContent = inputLabel;
+            document.getElementById('confirmTextHint').textContent = inputHint;
+            document.getElementById('confirmTextHint').dataset.expected = expectedText;
+            accept.textContent = confirmLabel;
+            accept.className = `px-4 py-2 ${danger ? 'bg-red-600 hover:bg-red-700' : 'bg-green-700 hover:bg-green-800'} text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors`;
+            inputWrap.classList.toggle('hidden', !expectedText);
+            input.value = '';
+            accept.disabled = !!expectedText;
+            modal.classList.add('active');
+            let resolve;
+            const promise = new Promise(done => { resolve = done; });
+            confirmationResolver = (confirmed) => {
+                modal.classList.remove('active');
+                confirmationResolver = null;
+                resolve(confirmed);
+            };
+            if (expectedText) setTimeout(() => input.focus(), 40);
+            else setTimeout(() => accept.focus(), 40);
+            return promise;
+        }
+
+        document.getElementById('acceptConfirmAction').addEventListener('click', () => {
+            const input = document.getElementById('confirmTextInput');
+            const expected = document.getElementById('confirmTextHint').dataset.expected || '';
+            if (expected && input.value.trim() !== expected) return;
+            if (confirmationResolver) confirmationResolver(true);
+        });
+        document.getElementById('cancelConfirmAction').addEventListener('click', () => confirmationResolver && confirmationResolver(false));
+        document.getElementById('confirmActionModal').addEventListener('click', (event) => {
+            if (event.target.id === 'confirmActionModal' && confirmationResolver) confirmationResolver(false);
+        });
+        document.getElementById('confirmTextInput').addEventListener('input', (event) => {
+            const expected = document.getElementById('confirmTextHint').dataset.expected || '';
+            document.getElementById('acceptConfirmAction').disabled = event.target.value.trim() !== expected;
+        });
+        document.getElementById('confirmTextInput').addEventListener('keydown', (event) => {
+            if (event.key === 'Enter' && !document.getElementById('acceptConfirmAction').disabled) document.getElementById('acceptConfirmAction').click();
         });
 
         document.getElementById('mobileMenuBtn').addEventListener('click', () => {
@@ -970,7 +1060,13 @@
         });
 
         async function impersonateUser(userId) {
-            if (!confirm('Are you sure you want to impersonate this user? You will be redirected to their dashboard.')) return;
+            const user = usersById[userId] || {};
+            if (!await confirmAction({
+                title: 'Impersonate member',
+                description: `You will be signed in as ${user.full_name || user.username || 'this member'} and redirected to their dashboard.`,
+                confirmLabel: 'Impersonate',
+                danger: false
+            })) return;
 
             try {
                 showToast('Impersonating user...', 'info');
@@ -992,7 +1088,13 @@
         }
 
         async function toggleOTP(userId) {
-            const enabled = confirm('Enable login OTP for this user?\n\nClick OK to enable, Cancel to disable.');
+            const user = usersById[userId] || {};
+            const enabled = await confirmAction({
+                title: 'Update login OTP',
+                description: `Choose whether login OTP should be enabled for ${user.full_name || user.username || 'this member'}.`,
+                confirmLabel: 'Enable OTP',
+                danger: false
+            });
 
             try {
                 await axios.put(`${API_BASE_URL}/user/login-otp-toggle`, {
@@ -1006,7 +1108,13 @@
         }
         
         async function resetUserPin(userId) {
-            if (!confirm('Are you sure you want to reset this user\'s transaction PIN to 000000?\n\nThe user will need to change it immediately.')) {
+            const user = usersById[userId] || {};
+            if (!await confirmAction({
+                title: 'Reset transaction PIN',
+                description: `Reset the transaction PIN for ${user.full_name || user.username || 'this member'} to 000000? The member will need to change it immediately.`,
+                confirmLabel: 'Reset PIN',
+                danger: true
+            })) {
                 return;
             }
 
@@ -1022,18 +1130,21 @@
         async function deleteUser(userId) {
             const user = usersById[userId] || {};
             const username = user.username || '';
+            const name = user.full_name || username || `user #${userId}`;
             const isAdmin = !!user.is_admin;
             const label = username ? `${username} (#${userId})` : `user #${userId}`;
-            const warning = isAdmin
-                ? `This account is also an admin account.\n\nType DELETE ADMIN to permanently delete ${label}.`
-                : `Type DELETE to permanently delete ${label}.`;
             const expected = isAdmin ? 'DELETE ADMIN' : 'DELETE';
-            const typed = prompt(`${warning}\n\nThis removes the user and related records. This cannot be undone.`);
+            const confirmed = await confirmAction({
+                title: isAdmin ? 'Delete administrator account' : 'Delete member account',
+                description: `${isAdmin ? 'This account has administrator access. ' : ''}Permanently delete ${name} (${label}) and its related records? This cannot be undone.`,
+                confirmLabel: 'Delete account',
+                danger: true,
+                expectedText: expected,
+                inputLabel: `Type ${expected} to confirm`,
+                inputHint: `Required text: ${expected}`
+            });
 
-            if (typed !== expected) {
-                if (typed !== null) showToast('Delete cancelled: confirmation text did not match', 'warning');
-                return;
-            }
+            if (!confirmed) return;
 
             try {
                 showToast('Deleting user...', 'info');
